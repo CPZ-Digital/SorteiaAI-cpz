@@ -142,30 +142,6 @@ Você pode instalar o Sorteio de Times como um aplicativo nativo no seu celular 
 
 ---
 
-## Rodando Localmente
-
-O app é um arquivo HTML único — basta abrir no navegador.
-
-```bash
-# Opção 1: Abrir direto
-# Dê duplo clique em index.html
-
-# Opção 2: Servidor local com Python
-python -m http.server 8000
-# Acesse http://localhost:8000
-
-# Opção 3: Com Node.js
-npx http-server
-
-# Opção 4: VS Code — extensão Live Server
-# Clique em "Go Live" no rodapé do VS Code
-```
-
-**Requisitos:** qualquer navegador moderno (Chrome, Firefox, Edge, Safari 12+).  
-Sem Node.js, sem npm, sem instalação — só abrir e usar.
-
----
-
 ## Tecnologias
 
 | Tecnologia | Uso |
