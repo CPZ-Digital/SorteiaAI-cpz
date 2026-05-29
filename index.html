@@ -754,7 +754,7 @@ input:focus{
             <div class="panel-head">
                 <div>
                     <h2>Quem vai jogar?</h2>
-                    <p class="hint">Toque em Â·Â·Â· para editar um jogador.</p>
+                    <p class="hint">Toque em ··· para editar um jogador.</p>
                 </div>
 
             </div>
@@ -826,7 +826,7 @@ input:focus{
                     </div>
 
                     <div>
-                        <label>FunÃ§Ãµes</label>
+                        <label>Funções</label>
                         <div class="checkbox-grid">
                             <label class="check-pill">
                                 <input type="checkbox" id="playerWoman">
@@ -1273,7 +1273,7 @@ function drawTeams(){
     }
 
     if(pool.length > capacity){
-        showNotice("O mÃ¡ximo suportado Ã© " + capacity + " jogadores. Remova alguns ou atualize a lista.");
+        showNotice("O máximo suportado é " + capacity + " jogadores. Remova alguns ou atualize a lista.");
         return;
     }
 
@@ -1308,7 +1308,7 @@ function drawTeams(){
     const activeTeamCount = best.filter(team => !team.waiting).length;
     const setters = pool.filter(player => player.setter).length;
     if(setters < activeTeamCount){
-        showNotice("Tem " + setters + " levantador(es) para " + activeTeamCount + " times. O app distribuiu o melhor possÃ­vel.");
+        showNotice("Tem " + setters + " levantador(es) para " + activeTeamCount + " times. O app distribuiu o melhor possível.");
     }else{
         hideNotice();
     }
@@ -1446,7 +1446,7 @@ function toggleLock(playerId, teamIndex){
     const countInTeam = Object.values(lockedPlayers).filter(ti => ti === teamIndex).length;
     if(countInTeam >= 2){
         const teamName = lastDraw && lastDraw[teamIndex] ? lastDraw[teamIndex].name : "esse time";
-        showLockNotice("MÃ¡ximo 2 por time â€” travar demais prejudica o equilÃ­brio do sorteio.");
+        showLockNotice("Máximo 2 por time — travar demais prejudica o equilíbrio do sorteio.");
         return;
     }
     lockedPlayers[playerId] = teamIndex;
