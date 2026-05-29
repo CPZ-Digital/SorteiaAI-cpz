@@ -1,0 +1,16 @@
+{
+  "name": "Sorteio de Times de Vôlei",
+  "short_name": "Sorteio",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0d2146",
+  "theme_color": "#0d2146",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
