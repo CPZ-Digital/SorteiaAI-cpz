@@ -814,11 +814,11 @@ input:focus{
                         <label for="playerSkill">Nota</label>
                         <input id="playerSkill" type="hidden" value="3" required>
                         <div class="rating-stars" id="ratingStars" aria-label="Nota do jogador" role="radiogroup">
-                            <button type="button" class="star-btn" data-value="1" aria-label="1 estrela">â˜…</button>
-                            <button type="button" class="star-btn" data-value="2" aria-label="2 estrelas">â˜…</button>
-                            <button type="button" class="star-btn" data-value="3" aria-label="3 estrelas">â˜…</button>
-                            <button type="button" class="star-btn" data-value="4" aria-label="4 estrelas">â˜…</button>
-                            <button type="button" class="star-btn" data-value="5" aria-label="5 estrelas">â˜…</button>
+                            <button type="button" class="star-btn" data-value="1" aria-label="1 estrela">★</button>
+                            <button type="button" class="star-btn" data-value="2" aria-label="2 estrelas">★</button>
+                            <button type="button" class="star-btn" data-value="3" aria-label="3 estrelas">★</button>
+                            <button type="button" class="star-btn" data-value="4" aria-label="4 estrelas">★</button>
+                            <button type="button" class="star-btn" data-value="5" aria-label="5 estrelas">★</button>
                         </div>
                     </div>
 
@@ -1313,7 +1313,7 @@ function drawTeams(){
 
 function renderStars(value){
     return Array.from({ length: 5 }, (_, index) => `
-        <span class="star ${index < value ? "active" : ""}" aria-hidden="true">â˜…</span>
+        <span class="star ${index < value ? "active" : ""}" aria-hidden="true">★</span>
     `).join("");
 }
 
