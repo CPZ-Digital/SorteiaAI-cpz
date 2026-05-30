@@ -639,6 +639,7 @@ textarea{
             <div class="player-grid" id="playerGrid"></div>
             <div class="actions-bar">
                 <button class="btn warning" type="button" id="configBtn">⚙ Sortear</button>
+                <button class="btn" type="button" id="redrawBtn" style="display:none;">↺ Refazer</button>
                 <button class="btn secondary" type="button" id="clearBtn">Limpar</button>
             </div>
         </section>
@@ -797,6 +798,7 @@ textarea{
 <script>
 const STORAGE_KEY = "volley-sorter-players-v1";
 const SELECTED_KEY = "volley-sorter-selected-v1";
+const CONFIG_KEY = "volley-sorter-config-v1";
 
 const POSITIONS = {
     levantador: "Levantador",
@@ -825,6 +827,9 @@ function init(){
     renderPlayers();
     setupEventListeners();
     initTheme();
+    if (localStorage.getItem(CONFIG_KEY)) {
+        document.getElementById("redrawBtn").style.display = "";
+    }
 }
 
 function loadData(){
@@ -955,6 +960,15 @@ function setupEventListeners(){
     document.getElementById("mode").addEventListener("change", e => {
         document.getElementById("mixedModeOptions").style.display = e.target.value === "misto" ? "grid" : "none";
     });
+    document.getElementById("redrawBtn").addEventListener("click", () => {
+        if (selectedIds.length === 0) {
+            alert("Selecione pelo menos um jogador!");
+            return;
+        }
+        const saved = JSON.parse(localStorage.getItem(CONFIG_KEY));
+        if (!saved) return;
+        drawTeams(saved.formation, saved.mode, saved.womenPercentage);
+    });
     document.getElementById("clearBtn").addEventListener("click", () => {
         selectedIds = [];
         saveData();
@@ -979,6 +993,8 @@ function handleDrawSubmit(e){
     const mode = document.getElementById("mode").value;
     const womenPercentage = mode === "misto" ? parseInt(document.getElementById("womenPercentage").value) : 0;
 
+    localStorage.setItem(CONFIG_KEY, JSON.stringify({ formation, mode, womenPercentage }));
+    document.getElementById("redrawBtn").style.display = "";
     drawTeams(formation, mode, womenPercentage);
     closeConfigModal();
 }
