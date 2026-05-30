@@ -254,7 +254,7 @@ h1, h2, h3, p{ margin:0; }
 /* ── PLAYER GRID ── */
 .player-grid{
     display:grid;
-    grid-template-columns:repeat(3, minmax(0, 1fr));
+    grid-template-columns:repeat(2, minmax(0, 1fr));
     gap:8px;
     padding:12px;
 }
@@ -264,7 +264,7 @@ h1, h2, h3, p{ margin:0; }
     display:flex;
     flex-direction:column;
     justify-content:space-between;
-    min-height:74px;
+    min-height:82px;
     padding:10px 10px 8px;
     border-radius:12px;
     background:var(--surface-soft);
@@ -286,7 +286,7 @@ h1, h2, h3, p{ margin:0; }
 .player-card.add-card{
     display:grid;
     place-items:center;
-    min-height:74px;
+    min-height:82px;
     font-size:22px;
     font-weight:700;
     color:var(--muted);
@@ -302,14 +302,14 @@ h1, h2, h3, p{ margin:0; }
 
 .player-name{
     display:block;
-    font-size:13px;
+    font-size:14px;
     font-weight:800;
     line-height:1.2;
     overflow:hidden;
     text-overflow:ellipsis;
     white-space:nowrap;
     color:var(--text);
-    padding-right:16px;
+    padding-right:18px;
 }
 
 .player-meta{
@@ -362,12 +362,15 @@ h1, h2, h3, p{ margin:0; }
 
 /* ── ACTIONS BAR ── */
 .actions-bar{
-    display:flex;
+    display:grid;
+    grid-template-columns:1fr 1fr;
     gap:8px;
     padding:10px 12px 14px;
 }
 
-.actions-bar .btn{ flex:1; }
+.actions-bar .btn-draw{
+    grid-column:1 / -1;
+}
 
 /* ── EMPTY STATE ── */
 .empty{
@@ -603,8 +606,12 @@ textarea{
 
 .form-row{
     display:grid;
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:1fr;
     gap:10px;
+}
+
+@media (min-width:400px){
+    .form-row{ grid-template-columns:1fr 1fr; }
 }
 
 .form-group-full{ grid-column:1 / -1; }
@@ -680,16 +687,12 @@ textarea{
 .star-btn.active{ background:var(--warning-soft); border-color:var(--warning); }
 
 /* ── RESPONSIVE ── */
-@media (max-width:600px){
-    .player-grid{ grid-template-columns:repeat(3, minmax(0, 1fr)); }
-    .teams-grid{ grid-template-columns:1fr; }
-}
-
 @media (min-width:480px){
-    .player-grid{ grid-template-columns:repeat(4, minmax(0, 1fr)); }
+    .player-grid{ grid-template-columns:repeat(3, minmax(0, 1fr)); }
 }
 
 @media (min-width:640px){
+    .player-grid{ grid-template-columns:repeat(4, minmax(0, 1fr)); }
     .teams-grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
 }
 
