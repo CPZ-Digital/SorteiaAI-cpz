@@ -593,6 +593,21 @@ textarea{
         grid-template-columns:repeat(2, minmax(0, 1fr));
     }
 }
+
+.footer-signature{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:10px 16px 4px;
+}
+
+.footer-signature img{
+    width:140px;
+    height:auto;
+    background:white;
+    border-radius:6px;
+    padding:4px 8px;
+}
 </style>
 </head>
 <body>
@@ -641,7 +656,9 @@ textarea{
         </section>
     </section>
 
-    <footer></footer>
+    <footer class="footer-signature">
+        <img src="cpz-assinatura.png" alt="CPZ">
+    </footer>
 </main>
 
 <div class="modal" id="playerModal">
