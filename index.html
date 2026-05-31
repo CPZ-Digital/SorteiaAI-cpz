@@ -987,7 +987,9 @@ function renderPlayers(){
         const skill = player.skill || 0;
         const dotClass = skill <= 2 ? "on-low" : skill === 3 ? "on-mid" : "on-high";
         const dots = Array.from({length:5}, (_, i) => `<span class="skill-dot ${i < skill ? dotClass : ""}"></span>`).join("");
-        const genderMark = player.gender === "feminino" ? ' <span style="color:var(--accent);font-size:10px;font-weight:800;">♀</span>' : "";
+        const genderMark = player.gender === "feminino"
+            ? ' <span style="color:#db2777;font-size:10px;font-weight:800;">♀</span>'
+            : ' <span style="color:var(--accent);font-size:10px;font-weight:800;">♂</span>';
         return `
             <div class="player-card ${selected ? "selected" : ""}" onclick="togglePlayer('${player.id}')">
                 <span class="player-name">${escapeHtml(player.name)}</span>
