@@ -1,7 +1,7 @@
 {
-  "name": "CPZ Sorteador de Times",
-  "short_name": "CPZ Sorteador",
-  "description": "Sorteador de times para vôlei, futebol, basquete e handebol",
+  "name": "Sorteia Aí!",
+  "short_name": "Sorteia Aí",
+  "description": "Sorteia times de vôlei, futebol, basquete e handebol de forma equilibrada",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",
