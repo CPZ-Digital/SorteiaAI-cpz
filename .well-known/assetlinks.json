@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.cpz.sorteiaai",
+    "sha256_cert_fingerprints": [
+      "EA:B9:E3:D8:3F:C3:3E:05:76:68:9D:B1:CF:40:0E:A5:5D:A7:A0:A0:90:5F:76:D8:9F:70:2D:DE:E4:29:8F:B1"
+    ]
+  }
+}]

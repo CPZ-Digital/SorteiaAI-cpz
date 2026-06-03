@@ -22,5 +22,12 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["sports", "utilities"]
+  "categories": ["sports", "utilities"],
+  "screenshots": [
+    { "src": "screenshot-home.png",     "sizes": "780x1688", "type": "image/png", "form_factor": "narrow", "label": "Tela inicial" },
+    { "src": "screenshot-volei.png",    "sizes": "780x1688", "type": "image/png", "form_factor": "narrow", "label": "Sorteio de vôlei" },
+    { "src": "screenshot-futebol.png",  "sizes": "780x1688", "type": "image/png", "form_factor": "narrow", "label": "Sorteio de futebol" },
+    { "src": "screenshot-basquete.png", "sizes": "780x1688", "type": "image/png", "form_factor": "narrow", "label": "Sorteio de basquete" },
+    { "src": "screenshot-handebol.png", "sizes": "780x1688", "type": "image/png", "form_factor": "narrow", "label": "Sorteio de handebol" }
+  ]
 }
