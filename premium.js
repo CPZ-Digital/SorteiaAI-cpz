@@ -42,9 +42,9 @@ function initPremiumUI(sport, sportName) {
         document.querySelector('.app').style.paddingBottom = premium ? '24px' : '74px';
     }
 
-    const modal      = document.getElementById('paywallModal');
-    const closeBtn   = document.getElementById('closePaywallBtn');
-    const buyBtn     = document.getElementById('unlockBtn');
+    const modal        = document.getElementById('paywallModal');
+    const closeBtn     = document.getElementById('closePaywallBtn');
+    const buyBtn       = document.getElementById('unlockBtn');
     const paywallTitle = document.getElementById('paywallTitle');
 
     if (!modal) return;
@@ -52,12 +52,9 @@ function initPremiumUI(sport, sportName) {
     if (paywallBtn) paywallBtn.addEventListener('click', () => modal.classList.add('show'));
     if (closeBtn)   closeBtn.addEventListener('click',   () => modal.classList.remove('show'));
     modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('show'); });
-
-    if (buyBtn) {
-        buyBtn.addEventListener('click', () => {
-            _showToast('Em breve! Disponível quando o app for lançado na Play Store 🚀', 4000);
-        });
-    }
+    if (buyBtn) buyBtn.addEventListener('click', () => {
+        _showToast('Em breve! Disponível quando o app for lançado na Play Store 🚀', 4000);
+    });
 }
 
 // ── CADEADO + DRAG-TO-SWAP ────────────────────────────────────────────
