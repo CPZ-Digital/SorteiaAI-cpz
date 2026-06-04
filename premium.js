@@ -42,6 +42,13 @@ function initPremiumUI(sport, sportName) {
         document.querySelector('.app').style.paddingBottom = premium ? '24px' : '74px';
     }
 
+    // Campos extras do formulário só aparecem no premium
+    document.querySelectorAll('.premium-only').forEach(el => {
+        el.style.display = premium
+            ? (el.classList.contains('form-row') ? 'grid' : 'block')
+            : 'none';
+    });
+
     const modal        = document.getElementById('paywallModal');
     const closeBtn     = document.getElementById('closePaywallBtn');
     const buyBtn       = document.getElementById('unlockBtn');

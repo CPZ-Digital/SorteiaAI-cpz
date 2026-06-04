@@ -227,37 +227,35 @@ textarea{ min-height:60px; resize:vertical; font-family:var(--font); }
                 <label>Nota Técnica (0-5) *</label>
                 <div class="star-rating" id="skillRating"></div>
             </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="positionMain">Posição Principal *</label>
-                    <select id="positionMain" required>
-                        <option value="">Selecione</option>
-                        <option value="goleiro">Goleiro</option>
-                        <option value="armadorCentral">Armador Central</option>
-                        <option value="armadorEsq">Armador Esquerdo</option>
-                        <option value="armadorDir">Armador Direito</option>
-                        <option value="pontaEsq">Ponta Esquerda</option>
-                        <option value="pontaDir">Ponta Direita</option>
-                        <option value="pivo">Pivô</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="positionSecond">Posição Secundária</label>
-                    <select id="positionSecond">
-                        <option value="">Nenhuma</option>
-                        <option value="goleiro">Goleiro</option>
-                        <option value="armadorCentral">Armador Central</option>
-                        <option value="armadorEsq">Armador Esquerdo</option>
-                        <option value="armadorDir">Armador Direito</option>
-                        <option value="pontaEsq">Ponta Esquerda</option>
-                        <option value="pontaDir">Ponta Direita</option>
-                        <option value="pivo">Pivô</option>
-                    </select>
-                </div>
+            <div class="form-group form-group-full">
+                <label for="positionMain">Posição Principal *</label>
+                <select id="positionMain" required>
+                    <option value="">Selecione</option>
+                    <option value="goleiro">Goleiro</option>
+                    <option value="armadorCentral">Armador Central</option>
+                    <option value="armadorEsq">Armador Esquerdo</option>
+                    <option value="armadorDir">Armador Direito</option>
+                    <option value="pontaEsq">Ponta Esquerda</option>
+                    <option value="pontaDir">Ponta Direita</option>
+                    <option value="pivo">Pivô</option>
+                </select>
             </div>
-            <div class="form-group">
-                <label for="experience">Experiência *</label>
-                <select id="experience" required>
+            <div class="form-group form-group-full premium-only">
+                <label for="positionSecond">Posição Secundária</label>
+                <select id="positionSecond">
+                    <option value="">Nenhuma</option>
+                    <option value="goleiro">Goleiro</option>
+                    <option value="armadorCentral">Armador Central</option>
+                    <option value="armadorEsq">Armador Esquerdo</option>
+                    <option value="armadorDir">Armador Direito</option>
+                    <option value="pontaEsq">Ponta Esquerda</option>
+                    <option value="pontaDir">Ponta Direita</option>
+                    <option value="pivo">Pivô</option>
+                </select>
+            </div>
+            <div class="form-group form-group-full premium-only">
+                <label for="experience">Experiência</label>
+                <select id="experience">
                     <option value="">Selecione</option>
                     <option value="iniciante">Iniciante</option>
                     <option value="recreativo">Recreativo</option>
@@ -266,7 +264,7 @@ textarea{ min-height:60px; resize:vertical; font-family:var(--font); }
                     <option value="competitivo">Competitivo</option>
                 </select>
             </div>
-            <div class="form-row">
+            <div class="form-row premium-only">
                 <div class="form-group">
                     <label for="height">Altura (cm)</label>
                     <input id="height" type="number" min="100" max="220" placeholder="Ex: 185">
@@ -279,7 +277,7 @@ textarea{ min-height:60px; resize:vertical; font-family:var(--font); }
                     </select>
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group premium-only">
                 <label for="notes">Observações</label>
                 <textarea id="notes" placeholder="Notas adicionais..."></textarea>
             </div>
@@ -476,7 +474,7 @@ function savePlayer(e){
     const height=document.getElementById("height").value?parseInt(document.getElementById("height").value):0;
     const availability=document.getElementById("availability").value;
     const notes=document.getElementById("notes").value.trim();
-    if(!name||!positionMain||!experience){ alert("Preencha todos os campos obrigatórios!"); return; }
+    if(!name||!positionMain){ alert("Preencha todos os campos obrigatórios!"); return; }
     if(editingId){ const p=players.find(x=>x.id===editingId); if(p) Object.assign(p,{name,gender,skill,positionMain,positionSecond,experience,height,availability,notes}); }
     else { const p={id:uid(),name,gender,skill,positionMain,positionSecond,experience,height,availability,notes}; players.push(p); selectedIds.push(p.id); }
     saveData(); renderPlayers(); closeModal();

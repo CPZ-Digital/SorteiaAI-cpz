@@ -226,33 +226,31 @@ textarea{ min-height:60px; resize:vertical; font-family:var(--font); }
                 <label>Nota Técnica (0-5) *</label>
                 <div class="star-rating" id="skillRating"></div>
             </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="positionMain">Posição Principal *</label>
-                    <select id="positionMain" required>
-                        <option value="">Selecione</option>
-                        <option value="armador">Armador (PG)</option>
-                        <option value="alaArmador">Ala Armador (SG)</option>
-                        <option value="ala">Ala (SF)</option>
-                        <option value="alaPivo">Ala Pivô (PF)</option>
-                        <option value="pivo">Pivô (C)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="positionSecond">Posição Secundária</label>
-                    <select id="positionSecond">
-                        <option value="">Nenhuma</option>
-                        <option value="armador">Armador (PG)</option>
-                        <option value="alaArmador">Ala Armador (SG)</option>
-                        <option value="ala">Ala (SF)</option>
-                        <option value="alaPivo">Ala Pivô (PF)</option>
-                        <option value="pivo">Pivô (C)</option>
-                    </select>
-                </div>
+            <div class="form-group form-group-full">
+                <label for="positionMain">Posição Principal *</label>
+                <select id="positionMain" required>
+                    <option value="">Selecione</option>
+                    <option value="armador">Armador (PG)</option>
+                    <option value="alaArmador">Ala Armador (SG)</option>
+                    <option value="ala">Ala (SF)</option>
+                    <option value="alaPivo">Ala Pivô (PF)</option>
+                    <option value="pivo">Pivô (C)</option>
+                </select>
             </div>
-            <div class="form-group">
-                <label for="experience">Experiência *</label>
-                <select id="experience" required>
+            <div class="form-group form-group-full premium-only">
+                <label for="positionSecond">Posição Secundária</label>
+                <select id="positionSecond">
+                    <option value="">Nenhuma</option>
+                    <option value="armador">Armador (PG)</option>
+                    <option value="alaArmador">Ala Armador (SG)</option>
+                    <option value="ala">Ala (SF)</option>
+                    <option value="alaPivo">Ala Pivô (PF)</option>
+                    <option value="pivo">Pivô (C)</option>
+                </select>
+            </div>
+            <div class="form-group form-group-full premium-only">
+                <label for="experience">Experiência</label>
+                <select id="experience">
                     <option value="">Selecione</option>
                     <option value="iniciante">Iniciante</option>
                     <option value="recreativo">Recreativo</option>
@@ -261,9 +259,9 @@ textarea{ min-height:60px; resize:vertical; font-family:var(--font); }
                     <option value="competitivo">Competitivo</option>
                 </select>
             </div>
-            <div class="form-row">
+            <div class="form-row premium-only">
                 <div class="form-group">
-                    <label for="height">Altura (cm) *</label>
+                    <label for="height">Altura (cm)</label>
                     <input id="height" type="number" min="140" max="230" placeholder="Ex: 185">
                 </div>
                 <div class="form-group">
@@ -274,7 +272,7 @@ textarea{ min-height:60px; resize:vertical; font-family:var(--font); }
                     </select>
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group premium-only">
                 <label for="notes">Observações</label>
                 <textarea id="notes" placeholder="Notas adicionais..."></textarea>
             </div>
@@ -475,7 +473,7 @@ function savePlayer(e){
     const height=document.getElementById("height").value?parseInt(document.getElementById("height").value):0;
     const availability=document.getElementById("availability").value;
     const notes=document.getElementById("notes").value.trim();
-    if(!name||!positionMain||!experience){ alert("Preencha todos os campos obrigatórios!"); return; }
+    if(!name||!positionMain){ alert("Preencha todos os campos obrigatórios!"); return; }
     if(editingId){ const p=players.find(x=>x.id===editingId); if(p) Object.assign(p,{name,gender,skill,positionMain,positionSecond,experience,height,availability,notes}); }
     else { const p={id:uid(),name,gender,skill,positionMain,positionSecond,experience,height,availability,notes}; players.push(p); selectedIds.push(p.id); }
     saveData(); renderPlayers(); closeModal();

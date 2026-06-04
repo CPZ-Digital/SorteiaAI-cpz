@@ -829,35 +829,33 @@ textarea{
                 <div class="star-rating" id="skillRating"></div>
             </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="positionMain">Posição Principal *</label>
-                    <select id="positionMain" required>
-                        <option value="">Selecione</option>
-                        <option value="levantador">Levantador</option>
-                        <option value="oposto">Oposto</option>
-                        <option value="ponteiro">Ponteiro</option>
-                        <option value="central">Central</option>
-                        <option value="libero">Líbero</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="positionSecond">Posição Secundária</label>
-                    <select id="positionSecond">
-                        <option value="">Nenhuma</option>
-                        <option value="levantador">Levantador</option>
-                        <option value="oposto">Oposto</option>
-                        <option value="ponteiro">Ponteiro</option>
-                        <option value="central">Central</option>
-                        <option value="libero">Líbero</option>
-                    </select>
-                </div>
+            <div class="form-group form-group-full">
+                <label for="positionMain">Posição Principal *</label>
+                <select id="positionMain" required>
+                    <option value="">Selecione</option>
+                    <option value="levantador">Levantador</option>
+                    <option value="oposto">Oposto</option>
+                    <option value="ponteiro">Ponteiro</option>
+                    <option value="central">Central</option>
+                    <option value="libero">Líbero</option>
+                </select>
             </div>
 
-            <div class="form-group form-group-full">
-                <label for="experience">Experiência *</label>
-                <select id="experience" required>
+            <div class="form-group form-group-full premium-only">
+                <label for="positionSecond">Posição Secundária</label>
+                <select id="positionSecond">
+                    <option value="">Nenhuma</option>
+                    <option value="levantador">Levantador</option>
+                    <option value="oposto">Oposto</option>
+                    <option value="ponteiro">Ponteiro</option>
+                    <option value="central">Central</option>
+                    <option value="libero">Líbero</option>
+                </select>
+            </div>
+
+            <div class="form-group form-group-full premium-only">
+                <label for="experience">Experiência</label>
+                <select id="experience">
                     <option value="">Selecione</option>
                     <option value="iniciante">Iniciante</option>
                     <option value="recreativo">Recreativo</option>
@@ -867,12 +865,11 @@ textarea{
                 </select>
             </div>
 
-            <div class="form-row">
+            <div class="form-row premium-only">
                 <div class="form-group">
                     <label for="height">Altura (cm)</label>
                     <input id="height" type="number" min="100" max="220" placeholder="Ex: 180">
                 </div>
-
                 <div class="form-group">
                     <label for="availability">Disponibilidade</label>
                     <select id="availability">
@@ -882,7 +879,7 @@ textarea{
                 </div>
             </div>
 
-            <div class="form-group form-group-full">
+            <div class="form-group form-group-full premium-only">
                 <label for="notes">Observações</label>
                 <textarea id="notes" placeholder="Notas adicionais..."></textarea>
             </div>
@@ -1239,7 +1236,7 @@ function savePlayer(e){
     const availability = document.getElementById("availability").value;
     const notes = document.getElementById("notes").value.trim();
 
-    if (!name || !positionMain || !experience) {
+    if (!name || !positionMain) {
         alert("Preencha todos os campos obrigatórios!");
         return;
     }
