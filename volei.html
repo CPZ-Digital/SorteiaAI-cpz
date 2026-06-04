@@ -1159,7 +1159,7 @@ function setupEventListeners(){
     document.getElementById("deleteBtn").addEventListener("click", deletePlayer);
     document.getElementById("configBtn").addEventListener("click", () => {
         if (selectedIds.length === 0) { alert("Selecione pelo menos um jogador!"); return; }
-        if (!isPremium("volei")) { drawTeams("livre", "pelada"); return; }
+        if (!isPremium("volei")) { let s; try{ s=JSON.parse(localStorage.getItem(CONFIG_KEY)); }catch(e){} drawTeams(s?.formation||"5x1","pelada"); return; }
         document.getElementById("configModal").classList.add("show");
     });
     document.getElementById("closeConfigBtn").addEventListener("click", closeConfigModal);

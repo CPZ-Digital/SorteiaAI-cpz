@@ -450,7 +450,7 @@ function setupEventListeners(){
     document.getElementById("closeModal").addEventListener("click",closeModal);
     document.getElementById("cancelBtn").addEventListener("click",closeModal);
     document.getElementById("deleteBtn").addEventListener("click",deletePlayer);
-    document.getElementById("configBtn").addEventListener("click",()=>{ if(selectedIds.length===0){ alert("Selecione pelo menos um jogador!"); return; } if(!isPremium("handebol")){ drawTeams("livre","pelada"); return; } document.getElementById("configModal").classList.add("show"); });
+    document.getElementById("configBtn").addEventListener("click",()=>{ if(selectedIds.length===0){ alert("Selecione pelo menos um jogador!"); return; } if(!isPremium("handebol")){ let s; try{ s=JSON.parse(localStorage.getItem(CONFIG_KEY)); }catch(e){} drawTeams(s?.formation||"7x7","pelada"); return; } document.getElementById("configModal").classList.add("show"); });
     document.getElementById("closeConfigBtn").addEventListener("click",closeConfigModal);
     document.getElementById("configForm").addEventListener("submit",handleDrawSubmit);
     document.getElementById("redrawBtn").addEventListener("click",()=>{ if(selectedIds.length===0){ alert("Selecione pelo menos um jogador!"); return; } let s; try{ s=JSON.parse(localStorage.getItem(CONFIG_KEY)); }catch(e){ return; } if(!s||!s.formation||!s.mode) return; drawTeams(s.formation,s.mode); });

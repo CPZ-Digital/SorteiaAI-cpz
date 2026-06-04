@@ -503,7 +503,7 @@ function setupEventListeners(){
     document.getElementById("deleteBtn").addEventListener("click",deletePlayer);
     document.getElementById("configBtn").addEventListener("click",()=>{
         if(selectedIds.length===0){ alert("Selecione pelo menos um jogador!"); return; }
-        if(!isPremium("futebol")){ drawTeams("livre","pelada"); return; }
+        if(!isPremium("futebol")){ let s; try{ s=JSON.parse(localStorage.getItem(CONFIG_KEY)); }catch(e){} drawTeams(s?.formation||"futsal","pelada"); return; }
         document.getElementById("configModal").classList.add("show");
     });
     document.getElementById("closeConfigBtn").addEventListener("click",closeConfigModal);
