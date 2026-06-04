@@ -937,7 +937,8 @@ textarea{
                 <select id="formationType">
                     <option value="5x1">5x1 (7 jogadores)</option>
                     <option value="6x2">6x2 (8 jogadores)</option>
-                    <option value="4x2">4x2 (6 jogadores)</option>
+                    <option value="4x2">4x2 (6 jogadores, com líbero)</option>
+                    <option value="6x0">6x0 (6 jogadores, sem líbero)</option>
                     <option value="livre">Livre (sem posições obrigatórias)</option>
                     <option value="areia">Areia 2x2 (2 jogadores)</option>
                     <option value="quarteto">Quarteto 4x4 (4 jogadores)</option>
@@ -976,11 +977,12 @@ const POSITIONS = {
 };
 
 const FORMATIONS = {
-    "5x1": { size: 7, required: { levantador: 1, oposto: 1, ponteiro: 2, central: 2, libero: 1 } },
-    "6x2": { size: 8, required: { levantador: 2, oposto: 1, ponteiro: 2, central: 2, libero: 1 } },
-    "4x2": { size: 6, required: { levantador: 2, oposto: 1, ponteiro: 2, central: 1, libero: 0 } },
-    "livre": { size: -1, required: {} },
-    "areia": { size: 2, required: {} },
+    "5x1":    { size: 7, required: { levantador: 1, oposto: 1, ponteiro: 2, central: 2, libero: 1 } },
+    "6x2":    { size: 8, required: { levantador: 2, oposto: 1, ponteiro: 2, central: 2, libero: 1 } },
+    "4x2":    { size: 6, required: { levantador: 2, oposto: 1, ponteiro: 2, central: 1 } },
+    "6x0":    { size: 6, required: {} },
+    "livre":  { size: -1, required: {} },
+    "areia":  { size: 2, required: {} },
     "quarteto": { size: 4, required: {} }
 };
 
@@ -1324,15 +1326,20 @@ function drawTeams(formation, mode){
 }
 
 function buildTeamsAttempt(pool, formation, mode){
-    let teams = [];
-
     const _fs = FORMATIONS[formation]?.size ?? -1;
-    const teamCount = _fs > 0
-        ? Math.max(2, Math.min(Math.ceil(pool.length / _fs), Math.floor(pool.length / 2)))
-        : getTeamCount(pool.length);
-    teams = Array.from({ length: teamCount }, (_, i) => ({ name: `Time ${i + 1}`, players: [] }));
 
-    // Agrupa por skill, embaralha dentro de cada grupo → snake draft real entre iterações
+    // Contagem de times: completos + banco se sobrar >= 2 jogadores
+    let teamCount;
+    if (_fs > 0) {
+        const full = Math.floor(pool.length / _fs);
+        const leftover = pool.length % _fs;
+        teamCount = Math.max(2, full + (leftover >= 2 ? 1 : 0));
+    } else {
+        teamCount = getTeamCount(pool.length);
+    }
+    const teams = Array.from({ length: teamCount }, (_, i) => ({ name: `Time ${i + 1}`, players: [] }));
+
+    // Agrupa por skill, embaralha dentro de cada grupo
     const bySkill = {};
     pool.forEach(p => {
         const s = p.skill ?? 3;
@@ -1344,53 +1351,58 @@ function buildTeamsAttempt(pool, formation, mode){
         .sort((a, b) => b - a)
         .flatMap(skill => shuffle(bySkill[skill]));
 
-    const n = teams.length;
-    sorted.forEach((player, idx) => {
-        teams[idx % n].players.push(player);
-    });
+    // Distribuição: times completos em round-robin, sobra vai pro banco (último time)
+    if (_fs > 0) {
+        const leftover = pool.length % _fs;
+        const hasBench = leftover >= 2 && teamCount > 2;
+        const playCount = hasBench ? teamCount - 1 : teamCount;
+        const mainEnd = playCount * _fs;
+        sorted.forEach((player, idx) => {
+            teams[idx < mainEnd ? idx % playCount : teamCount - 1].players.push(player);
+        });
+    } else {
+        sorted.forEach((player, idx) => {
+            teams[idx % teamCount].players.push(player);
+        });
+    }
 
-    const score = calculateScore(teams, formation, mode);
-    const confidence = calculateConfidence(teams, formation, mode);
+    const score = calculateScore(teams, formation, mode, _fs);
+    const confidence = calculateConfidence(teams, formation, mode, _fs);
 
     return { teams, score, confidence };
 }
 
-function calculateScore(teams, formation, mode){
+function calculateScore(teams, formation, mode, _fs = -1){
     let score = 0;
 
-    // Skill balance
+    // Identifica time banco (último time com menos jogadores que a formação)
+    const hasBench = _fs > 0 && teams.length > 2 && teams[teams.length-1].players.length < _fs;
+    const playing = hasBench ? teams.slice(0, -1) : teams;
+
+    // Skill balance entre todos os times (incluindo banco pra rotação ficar justa)
     const skills = teams.map(t => t.players.reduce((s, p) => s + p.skill, 0));
     const avgSkill = skills.reduce((a, b) => a + b, 0) / skills.length;
-    const skillVariance = skills.reduce((sum, s) => sum + Math.abs(s - avgSkill), 0);
-    score += skillVariance * 10;
+    score += skills.reduce((sum, s) => sum + Math.abs(s - avgSkill), 0) * 10;
 
-    // Size balance
-    const sizes = teams.map(t => t.players.length);
-    const maxSize = Math.max(...sizes);
-    const minSize = Math.min(...sizes);
-    score += (maxSize - minSize) * 20;
+    // Tamanho: só entre times completos (banco não penaliza)
+    const sizes = playing.map(t => t.players.length);
+    score += (Math.max(...sizes) - Math.min(...sizes)) * 20;
 
-    // Experience balance (for training mode)
+    // Modo treino: misturar forças
     if (mode === "treino") {
-        const experiences = teams.map(t => {
-            const avgExp = t.players.reduce((sum, p) => sum + p.skill, 0) / Math.max(1, t.players.length);
-            return avgExp;
-        });
-        const avgExp = experiences.reduce((a, b) => a + b, 0) / experiences.length;
-        const expVariance = experiences.reduce((sum, e) => sum + Math.abs(e - avgExp), 0);
-        score += expVariance * 8;
+        const avgs = playing.map(t => t.players.reduce((s,p) => s+p.skill,0) / Math.max(1,t.players.length));
+        const avg = avgs.reduce((a,b) => a+b,0) / avgs.length;
+        score += avgs.reduce((s,e) => s + Math.abs(e-avg),0) * 8;
     }
 
-    // Position balance (for fixed formations)
-    if (formation !== "livre" && formation !== "areia" && formation !== "quarteto") {
-        const required = FORMATIONS[formation].required;
-        teams.forEach(team => {
+    // Posições: só times completos, só formações com posições definidas
+    const required = FORMATIONS[formation]?.required ?? {};
+    if (Object.keys(required).length > 0) {
+        playing.forEach(team => {
             Object.keys(required).forEach(pos => {
-                const count = team.players.filter(p => p.positionMain === pos).length;
-                const needed = required[pos];
-                if (count < needed) {
-                    score += (needed - count) * 50;
-                }
+                const need = required[pos];
+                const have = team.players.filter(p => p.positionMain === pos).length;
+                if (have < need) score += (need - have) * 50;
             });
         });
     }
@@ -1398,28 +1410,24 @@ function calculateScore(teams, formation, mode){
     return Math.round(score);
 }
 
-function calculateConfidence(teams, formation, mode){
+function calculateConfidence(teams, formation, mode, _fs = -1){
     let confidence = 100;
 
-    // Check skill balance
-    const skills = teams.map(t => t.players.reduce((s, p) => s + p.skill, 0));
+    const hasBench = _fs > 0 && teams.length > 2 && teams[teams.length-1].players.length < _fs;
+    const playing = hasBench ? teams.slice(0, -1) : teams;
+
+    const skills = playing.map(t => t.players.reduce((s, p) => s + p.skill, 0));
     const avgSkill = skills.reduce((a, b) => a + b, 0) / skills.length;
     const skillDiff = Math.max(...skills) - Math.min(...skills);
     if (skillDiff > avgSkill * 0.3) confidence -= 10;
     if (skillDiff > avgSkill * 0.5) confidence -= 15;
 
-    // Check formation requirements
-    if (formation !== "livre" && formation !== "areia" && formation !== "quarteto") {
-        const required = FORMATIONS[formation].required;
-        const totalMissing = teams.reduce((sum, team) => {
-            return sum + Object.keys(required).reduce((teamSum, pos) => {
-                const count = team.players.filter(p => p.positionMain === pos).length;
-                const needed = required[pos];
-                return teamSum + Math.max(0, needed - count);
-            }, 0);
-        }, 0);
-
-        if (totalMissing > 0) confidence -= totalMissing * 5;
+    const required = FORMATIONS[formation]?.required ?? {};
+    if (Object.keys(required).length > 0) {
+        const missing = playing.reduce((sum, team) =>
+            sum + Object.keys(required).reduce((ts, pos) =>
+                ts + Math.max(0, required[pos] - team.players.filter(p => p.positionMain === pos).length), 0), 0);
+        if (missing > 0) confidence -= missing * 5;
     }
 
     return Math.max(0, confidence);
