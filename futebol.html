@@ -594,46 +594,53 @@ function drawTeams(formation,mode){
 
 function buildTeamsAttempt(pool,formation,mode){
     const _fs=FORMATIONS[formation]?.size??-1;
-    const n=_fs>0?Math.max(2,Math.min(Math.ceil(pool.length/_fs),Math.floor(pool.length/2))):getTeamCount(pool.length);
-    const teams=Array.from({length:n},(_,i)=>({name:`Time ${i+1}`,players:[]}));
+    let teamCount, useFormationSize=false;
+    if(_fs>0){
+        const full=Math.floor(pool.length/_fs);
+        if(full>=1){ const leftover=pool.length%_fs; teamCount=Math.max(2,full+(leftover>0?1:0)); useFormationSize=true; }
+        else { teamCount=getTeamCount(pool.length); }
+    } else { teamCount=getTeamCount(pool.length); }
+    const teams=Array.from({length:teamCount},(_,i)=>({name:`Time ${i+1}`,players:[]}));
     const bySkill={};
     pool.forEach(p=>{ const s=p.skill??3; if(!bySkill[s]) bySkill[s]=[]; bySkill[s].push(p); });
     const sorted=Object.keys(bySkill).map(Number).sort((a,b)=>b-a).flatMap(s=>shuffle(bySkill[s]));
-    sorted.forEach((p,i)=>teams[i%n].players.push(p));
-    return {teams, score:calculateScore(teams,formation,mode), confidence:calculateConfidence(teams,formation,mode)};
+    if(useFormationSize){
+        const full=Math.floor(pool.length/_fs);
+        sorted.forEach((p,i)=>{ if(i<full*_fs) teams[i%full].players.push(p); else teams[teamCount-1].players.push(p); });
+    } else { sorted.forEach((p,i)=>teams[i%teamCount].players.push(p)); }
+    const eFs=useFormationSize?_fs:-1;
+    return {teams, score:calculateScore(teams,formation,mode,eFs), confidence:calculateConfidence(teams,formation,mode,eFs)};
 }
 
-function calculateScore(teams,formation,mode){
+function calculateScore(teams,formation,mode,_fs=-1){
     let score=0;
+    const hasBench=_fs>0&&teams.length>2&&teams[teams.length-1].players.length<_fs;
+    const playing=hasBench?teams.slice(0,-1):teams;
     const skills=teams.map(t=>t.players.reduce((s,p)=>s+p.skill,0));
     const avgS=skills.reduce((a,b)=>a+b,0)/skills.length;
     score+=skills.reduce((s,x)=>s+Math.abs(x-avgS),0)*10;
-    const sizes=teams.map(t=>t.players.length);
+    const sizes=playing.map(t=>t.players.length);
     score+=(Math.max(...sizes)-Math.min(...sizes))*20;
     if(mode==="treino"){
-        const exps=teams.map(t=>t.players.reduce((s,p)=>s+p.skill,0)/Math.max(1,t.players.length));
+        const exps=playing.map(t=>t.players.reduce((s,p)=>s+p.skill,0)/Math.max(1,t.players.length));
         const avgE=exps.reduce((a,b)=>a+b,0)/exps.length;
         score+=exps.reduce((s,e)=>s+Math.abs(e-avgE),0)*8;
     }
     const req=FORMATIONS[formation]?.required||{};
-    Object.keys(req).forEach(pos=>{
-        teams.forEach(t=>{
-            const cnt=t.players.filter(p=>p.positionMain===pos).length;
-            if(cnt<req[pos]) score+=(req[pos]-cnt)*60;
-        });
-    });
+    Object.keys(req).forEach(pos=>{ playing.forEach(t=>{ const cnt=t.players.filter(p=>p.positionMain===pos).length; if(cnt<req[pos]) score+=(req[pos]-cnt)*60; }); });
     return Math.round(score);
 }
 
-function calculateConfidence(teams,formation,mode){
+function calculateConfidence(teams,formation,mode,_fs=-1){
     let c=100;
-    const skills=teams.map(t=>t.players.reduce((s,p)=>s+p.skill,0));
+    const hasBench=_fs>0&&teams.length>2&&teams[teams.length-1].players.length<_fs;
+    const playing=hasBench?teams.slice(0,-1):teams;
+    const skills=playing.map(t=>t.players.reduce((s,p)=>s+p.skill,0));
     const avg=skills.reduce((a,b)=>a+b,0)/skills.length;
     const diff=Math.max(...skills)-Math.min(...skills);
-    if(diff>avg*0.3) c-=10;
-    if(diff>avg*0.5) c-=15;
+    if(diff>avg*0.3) c-=10; if(diff>avg*0.5) c-=15;
     const req=FORMATIONS[formation]?.required||{};
-    const missing=teams.reduce((s,t)=>s+Object.keys(req).reduce((ts,pos)=>ts+Math.max(0,req[pos]-t.players.filter(p=>p.positionMain===pos).length),0),0);
+    const missing=playing.reduce((s,t)=>s+Object.keys(req).reduce((ts,pos)=>ts+Math.max(0,req[pos]-t.players.filter(p=>p.positionMain===pos).length),0),0);
     if(missing>0) c-=missing*5;
     return Math.max(0,c);
 }
