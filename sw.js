@@ -1,4 +1,4 @@
-const CACHE = "appsorteio-v15";
+const CACHE = "appsorteio-v16";
 const ASSETS = [
     "./",
     "./index.html",
@@ -6,6 +6,7 @@ const ASSETS = [
     "./futebol.html",
     "./basquete.html",
     "./handebol.html",
+    "./premium.js",
     "./cpz-assinatura.png",
     "./icon-192.png",
     "./banner-home.png",
@@ -30,6 +31,16 @@ self.addEventListener("activate", e => {
 });
 
 self.addEventListener("fetch", e => {
+    // Navegação: tenta cache, depois rede, fallback para index
+    if (e.request.mode === "navigate") {
+        e.respondWith(
+            caches.match(e.request)
+                .then(cached => cached || fetch(e.request))
+                .catch(() => caches.match("./index.html"))
+        );
+        return;
+    }
+    // Outros recursos: cache-first, fallback para rede
     e.respondWith(
         caches.match(e.request).then(cached => cached || fetch(e.request))
     );
