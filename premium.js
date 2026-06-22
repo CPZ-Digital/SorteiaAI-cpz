@@ -20,6 +20,94 @@ function revokePremium(sport) {
     } catch {}
 }
 
+// ── DIGITAL GOODS API — Google Play Billing (só ativo dentro do TWA/APK) ──
+//
+// IDs de produto — cadastrar IDÊNTICOS no Google Play Console:
+//   com.cpz.sorteiaai.pacote_completo  →  R$ 23,99  (todos os 4 esportes)
+//   com.cpz.sorteiaai.volei            →  R$ 7,99
+//   com.cpz.sorteiaai.futebol          →  R$ 7,99
+//   com.cpz.sorteiaai.basquete         →  R$ 7,99
+//   com.cpz.sorteiaai.handebol         →  R$ 7,99
+//
+const _PLAY_URL = 'https://play.google.com/billing';
+const IAP = {
+    pacote:  'com.cpz.sorteiaai.pacote_completo',
+    volei:   'com.cpz.sorteiaai.volei',
+    futebol: 'com.cpz.sorteiaai.futebol',
+    basquete:'com.cpz.sorteiaai.basquete',
+    handebol:'com.cpz.sorteiaai.handebol',
+};
+const _ALL_SPORTS = ['volei', 'futebol', 'basquete', 'handebol'];
+
+let _dgs = null; // cache do serviço
+
+async function _getDGS() {
+    if (_dgs) return _dgs;
+    if (!('getDigitalGoodsService' in window)) return null;
+    try { _dgs = await window.getDigitalGoodsService(_PLAY_URL); return _dgs; }
+    catch { return null; }
+}
+
+// Chama ao abrir o app: sincroniza compras reais do Play Store com localStorage.
+// Protege contra usuário que manipulou o localStorage manualmente —
+// se a compra não existir no Play Store, ela simplesmente não é restaurada.
+async function _restorePurchases() {
+    const svc = await _getDGS();
+    if (!svc) return false;
+    try {
+        const list = await svc.listPurchases();
+        let changed = false;
+        for (const p of list) {
+            if (p.itemId === IAP.pacote) {
+                _ALL_SPORTS.forEach(s => { if (!isPremium(s)) { unlockPremium(s); changed = true; } });
+            } else {
+                const sport = Object.keys(IAP).find(k => IAP[k] === p.itemId);
+                if (sport && sport !== 'pacote' && !isPremium(sport)) { unlockPremium(sport); changed = true; }
+            }
+        }
+        // Revoga prêmios locais que não existem no Play Store
+        const purchasedIds = new Set(list.map(p => p.itemId));
+        const hasPackage = purchasedIds.has(IAP.pacote);
+        _ALL_SPORTS.forEach(s => {
+            if (isPremium(s) && !hasPackage && !purchasedIds.has(IAP[s])) {
+                revokePremium(s); changed = true;
+            }
+        });
+        return changed;
+    } catch { return false; }
+}
+
+async function _buyPackage(onSuccess, onError) {
+    const svc = await _getDGS();
+    if (!svc) { onError?.('not_twa'); return; }
+    try {
+        const [detail] = await svc.getDetails([IAP.pacote]);
+        if (!detail) { onError?.('not_found'); return; }
+        const result = await svc.purchase(detail.itemId);
+        if (result) {
+            _ALL_SPORTS.forEach(s => unlockPremium(s));
+            onSuccess?.();
+        }
+    } catch (e) {
+        if (e?.name !== 'AbortError') onError?.(e);
+    }
+}
+
+async function _buySport(sport, onSuccess, onError) {
+    const svc = await _getDGS();
+    if (!svc) { onError?.('not_twa'); return; }
+    const productId = IAP[sport];
+    if (!productId) { onError?.('unknown'); return; }
+    try {
+        const [detail] = await svc.getDetails([productId]);
+        if (!detail) { onError?.('not_found'); return; }
+        const result = await svc.purchase(detail.itemId);
+        if (result) { unlockPremium(sport); onSuccess?.(); }
+    } catch (e) {
+        if (e?.name !== 'AbortError') onError?.(e);
+    }
+}
+
 // ── UI FREE/PREMIUM ───────────────────────────────────────────────────
 function initPremiumUI(sport, sportName) {
     const premium = isPremium(sport);
@@ -42,19 +130,18 @@ function initPremiumUI(sport, sportName) {
         document.querySelector('.app').style.paddingBottom = premium ? '24px' : '74px';
     }
 
-    // Campos extras do formulário só aparecem no premium
     document.querySelectorAll('.premium-only').forEach(el => {
         el.style.display = premium
             ? (el.classList.contains('form-row') ? 'grid' : 'block')
             : 'none';
     });
 
-    const modal           = document.getElementById('paywallModal');
-    const closeBtn        = document.getElementById('closePaywallBtn');
-    const buyBtn          = document.getElementById('unlockBtn');
-    const buySingleBtn    = document.getElementById('unlockSingleBtn');
-    const singleLabel     = document.getElementById('singleSportLabel');
-    const paywallTitle    = document.getElementById('paywallTitle');
+    const modal        = document.getElementById('paywallModal');
+    const closeBtn     = document.getElementById('closePaywallBtn');
+    const buyBtn       = document.getElementById('unlockBtn');
+    const buySingleBtn = document.getElementById('unlockSingleBtn');
+    const singleLabel  = document.getElementById('singleSportLabel');
+    const paywallTitle = document.getElementById('paywallTitle');
 
     if (!modal) return;
     if (paywallTitle) paywallTitle.textContent = 'Premium';
@@ -62,16 +149,57 @@ function initPremiumUI(sport, sportName) {
     if (paywallBtn) paywallBtn.addEventListener('click', () => modal.classList.add('show'));
     if (closeBtn)   closeBtn.addEventListener('click',   () => modal.classList.remove('show'));
     modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('show'); });
-    if (buyBtn) buyBtn.addEventListener('click', () => {
-        // TODO: integrar Google Play Billing (produto: com.cpz.sorteiaai.pacote_completo)
-        // Ao confirmar: unlockPremium('volei'); unlockPremium('futebol'); unlockPremium('basquete'); unlockPremium('handebol');
-        _showToast('Em breve! Disponível quando o app for lançado na Play Store 🚀', 4000);
+
+    if (buyBtn) buyBtn.addEventListener('click', async () => {
+        const orig = buyBtn.innerHTML;
+        buyBtn.disabled = true;
+        buyBtn.textContent = 'Processando...';
+        await _buyPackage(
+            () => {
+                modal.classList.remove('show');
+                _showToast('Pacote Completo desbloqueado! 🎉', 3000);
+                setTimeout(() => location.reload(), 1200);
+            },
+            (err) => {
+                buyBtn.disabled = false;
+                buyBtn.innerHTML = orig;
+                _showToast(
+                    err === 'not_twa'
+                        ? 'Em breve! Disponível quando o app for lançado na Play Store 🚀'
+                        : 'Não foi possível concluir a compra. Tente novamente.',
+                    4000
+                );
+            }
+        );
     });
-    if (buySingleBtn) buySingleBtn.addEventListener('click', () => {
-        // TODO: integrar Google Play Billing (produto: com.cpz.sorteiaai.[sport])
-        // Ao confirmar: unlockPremium(sport);
-        _showToast('Em breve! Disponível quando o app for lançado na Play Store 🚀', 4000);
+
+    if (buySingleBtn) buySingleBtn.addEventListener('click', async () => {
+        const orig = buySingleBtn.innerHTML;
+        buySingleBtn.disabled = true;
+        buySingleBtn.textContent = 'Processando...';
+        await _buySport(
+            sport,
+            () => {
+                modal.classList.remove('show');
+                _showToast(`${sportName} desbloqueado! 🎉`, 3000);
+                setTimeout(() => location.reload(), 1200);
+            },
+            (err) => {
+                buySingleBtn.disabled = false;
+                buySingleBtn.innerHTML = orig;
+                _showToast(
+                    err === 'not_twa'
+                        ? 'Em breve! Disponível quando o app for lançado na Play Store 🚀'
+                        : 'Não foi possível concluir a compra. Tente novamente.',
+                    4000
+                );
+            }
+        );
     });
+
+    // Restaura compras reais do Play Store em background.
+    // Se o status mudou (ex: compra em outro device), recarrega a página.
+    _restorePurchases().then(changed => { if (changed) location.reload(); });
 
     _initDevTrigger(sport, sportName);
 }
