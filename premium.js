@@ -55,7 +55,14 @@ async function _restorePurchases() {
     const svc = await _getDGS();
     if (!svc) return false;
     try {
-        const list = await svc.listPurchases();
+        let list = await svc.listPurchases();
+        // Play Billing pode responder vazio por instabilidade transitória (comum em
+        // Android real) — antes de revogar Premium de quem já pagou, confirma com
+        // uma segunda tentativa em vez de confiar na primeira resposta.
+        if (list.length === 0) {
+            await new Promise(r => setTimeout(r, 800));
+            list = await svc.listPurchases();
+        }
         let changed = false;
         for (const p of list) {
             if (p.itemId === IAP.pacote) {
