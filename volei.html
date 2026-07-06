@@ -68,6 +68,7 @@ html[data-theme='dark']{
 }
 
 *{ box-sizing:border-box; }
+html,body{ touch-action:pan-x pan-y; }
 
 body{
     margin:0;
@@ -1570,6 +1571,17 @@ initPremiumUI("volei", "Vôlei");
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js").catch(() => {});
 }
+</script>
+<script>
+// ponytail: bloqueia pinch-zoom e double-tap-zoom (viewport user-scalable=no sozinho nao basta no Chrome atual)
+document.addEventListener("touchmove",function(e){ if(e.touches.length>1) e.preventDefault(); },{passive:false});
+document.addEventListener("gesturestart",function(e){ e.preventDefault(); });
+let lastTouchEnd=0;
+document.addEventListener("touchend",function(e){
+  const now=Date.now();
+  if(now-lastTouchEnd<=300) e.preventDefault();
+  lastTouchEnd=now;
+},{passive:false});
 </script>
 </body>
 </html>

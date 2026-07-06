@@ -44,6 +44,7 @@ html[data-theme='dark']{
     --team4:#22c55e; --team4-soft:#14532d;
 }
 *{ box-sizing:border-box; }
+html,body{ touch-action:pan-x pan-y; }
 body{ margin:0; min-height:100vh; background:var(--bg); color:var(--text); font-family:var(--font); }
 button,input,select,textarea{ font:inherit; }
 button{ border:none; cursor:pointer; }
@@ -732,6 +733,17 @@ function fallbackCopy(text){
 init();
 initPremiumUI("futebol", "Futebol");
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js").catch(()=>{}); }
+</script>
+<script>
+// ponytail: bloqueia pinch-zoom e double-tap-zoom (viewport user-scalable=no sozinho nao basta no Chrome atual)
+document.addEventListener("touchmove",function(e){ if(e.touches.length>1) e.preventDefault(); },{passive:false});
+document.addEventListener("gesturestart",function(e){ e.preventDefault(); });
+let lastTouchEnd=0;
+document.addEventListener("touchend",function(e){
+  const now=Date.now();
+  if(now-lastTouchEnd<=300) e.preventDefault();
+  lastTouchEnd=now;
+},{passive:false});
 </script>
 </body>
 </html>
